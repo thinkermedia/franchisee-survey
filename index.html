@@ -132,16 +132,40 @@
     border-radius:10px;
     padding:12px 16px;
     margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
   }
-  .rank-row input{
-    width:56px;
-    padding:8px;
-    border:1px solid var(--border);
-    border-radius:6px;
-    text-align:center;
-    font-size:15px;
+  .rank-row:hover{border-color:var(--blue);}
+  .rank-row.ranked{
+    border-color:var(--blue);
+    background:var(--blue-light);
+  }
+  .rank-badge{
+    width:30px;
+    height:30px;
+    flex:none;
+    border-radius:50%;
+    border:1.5px solid var(--border);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    font-weight:700;
+    color:var(--muted);
+  }
+  .rank-row.ranked .rank-badge{
+    background:var(--blue);
+    border-color:var(--blue);
+    color:#fff;
   }
   .rank-text{flex:1; font-size:14.5px;}
+  .rank-optional-tag{
+    font-size:12px;
+    color:var(--muted);
+    font-weight:600;
+    flex:none;
+  }
   textarea{
     width:100%;
     min-height:110px;
@@ -560,13 +584,21 @@ function renderQuestion(){
   }
 
   if (q.type === "rank"){
-    var ranks = (answers[q.id] && answers[q.id].ranks) || {};
+    html += '<p class="hint">Tap items in order, most important first' + (q.otherOption ? ' (“Other” is optional)' : '') + '.</p>';
+    var order = (answers[q.id] && answers[q.id].order) || [];
     q.options.forEach(function(opt, i){
-      html += '<div class="rank-row"><input type="number" min="1" max="' + q.options.length + '" data-rankopt="' + i + '" value="' + (ranks[i] || "") + '">' +
-        '<span class="rank-text">' + escapeHtml(opt) + '</span></div>';
+      var pos = order.indexOf(i);
+      var isOther = (opt === q.otherOption);
+      html += '<div class="rank-row' + (pos > -1 ? ' ranked' : '') + '" data-rankopt="' + i + '">' +
+        '<span class="rank-badge">' + (pos > -1 ? (pos + 1) : '') + '</span>' +
+        '<span class="rank-text">' + escapeHtml(opt) + '</span>' +
+        (isOther ? '<span class="rank-optional-tag">Optional</span>' : '') +
+        '</div>';
     });
     if (q.otherOption){
-      html += '<input type="text" class="other-input show" id="otherText" placeholder="If “Other” ranked, please specify" value="' + escapeHtml((answers[q.id] && answers[q.id].other) || "") + '">';
+      var otherIdx = q.options.indexOf(q.otherOption);
+      var otherRanked = order.indexOf(otherIdx) > -1;
+      html += '<input type="text" class="other-input' + (otherRanked ? ' show' : '') + '" id="otherText" placeholder="Please specify" value="' + escapeHtml((answers[q.id] && answers[q.id].other) || "") + '">';
     }
   }
 
@@ -636,13 +668,28 @@ function wireQuestionEvents(q){
     });
   }
   if (q.type === "rank"){
-    card.querySelectorAll('[data-rankopt]').forEach(function(el){
-      el.oninput = function(){
+    card.querySelectorAll('.rank-row').forEach(function(el){
+      el.onclick = function(){
         var i = parseInt(el.getAttribute("data-rankopt"), 10);
-        answers[q.id] = answers[q.id] || { ranks: {} };
-        answers[q.id].ranks[i] = el.value;
+        answers[q.id] = answers[q.id] || { order: [] };
+        var order = answers[q.id].order;
+        var pos = order.indexOf(i);
+        if (pos > -1){
+          order.splice(pos, 1); // tap again to undo this item's rank
+        } else {
+          order.push(i);
+        }
+        renderQuestion(); // re-render to update badges/positions
       };
     });
+    var otherBox = document.getElementById("otherText");
+    if (otherBox){
+      otherBox.onclick = function(e){ e.stopPropagation(); };
+      otherBox.oninput = function(){
+        answers[q.id] = answers[q.id] || { order: [] };
+        answers[q.id].other = otherBox.value;
+      };
+    }
   }
 }
 
@@ -675,17 +722,14 @@ function handleNext(q){
     }
   }
   if (q.type === "rank"){
-    var ranks = (answers[q.id] && answers[q.id].ranks) || {};
-    var n = q.options.length;
-    var seen = {};
-    for (var i = 0; i < n; i++){
-      var v = parseInt(ranks[i], 10);
-      if (!v || v < 1 || v > n){ showErr("Please rank every item from 1 to " + n + "."); return; }
-      if (seen[v]){ showErr("Each rank number can only be used once."); return; }
-      seen[v] = true;
-    }
-    if (q.otherOption && otherBox && otherBox.classList.contains("show") === false){
-      // other box always shown for rank questions that have it; no-op
+    var order = (answers[q.id] && answers[q.id].order) || [];
+    var otherIdx = q.otherOption ? q.options.indexOf(q.otherOption) : -1;
+    var requiredIdx = q.options.map(function(_, i){ return i; }).filter(function(i){ return i !== otherIdx; });
+    var missing = requiredIdx.some(function(i){ return order.indexOf(i) === -1; });
+    if (missing){ showErr("Please rank every item" + (q.otherOption ? " (“Other” is optional)" : "") + "."); return; }
+    if (otherIdx > -1 && order.indexOf(otherIdx) > -1){
+      if (!otherBox || !otherBox.value.trim()){ showErr("Please specify your “Other” answer, or tap it again to remove it from your ranking."); return; }
+      answers[q.id].other = otherBox.value.trim();
     }
   }
   if (q.type === "text"){
@@ -734,8 +778,10 @@ function buildPayload(){
       });
       if (a.other) row[q.code + "_other"] = a.other;
     } else if (q.type === "rank"){
+      var order = a.order || [];
       q.options.forEach(function(opt, i){
-        row[q.code + " | " + opt] = (a.ranks && a.ranks[i]) ? a.ranks[i] : "";
+        var pos = order.indexOf(i);
+        row[q.code + " | " + opt] = pos > -1 ? (pos + 1) : "";
       });
       if (a.other) row[q.code + "_other"] = a.other;
     } else if (q.type === "text"){
@@ -773,7 +819,7 @@ function logEvent(type, qid){
       mode: "no-cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "event", ref: REF, type: type, qid: qid || "" })
-    });
+    }).catch(function(){});
   }catch(e){}
 }
 
