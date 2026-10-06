@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Franchisee Research Survey</title>
+<style>
+  :root{
+    --blue:#1d5fd1;
+    --blue-dark:#12408f;
+    --blue-light:#eef3fc;
+    --ink:#1a2233;
+    --muted:#5b6578;
+    --border:#dde3ee;
+    --bg:#f5f7fb;
+    --white:#ffffff;
+    --error:#c22d2d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{
+    height:5px;
+    background:var(--border);
+    width:100%;
+  }
+  .topbar-fill{
+    height:100%;
+    background:var(--blue);
+    width:0%;
+    transition:width .25s ease;
+  }
+  .wrap{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px 60px;
+  }
+  .card{
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:14px;
+    max-width:680px;
+    width:100%;
+    padding:40px 36px;
+    box-shadow:0 2px 14px rgba(20,30,60,.05);
+  }
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:12px;
+    font-weight:700;
+    color:var(--blue);
+    margin:0 0 10px;
+  }
+  h1{
+    font-size:26px;
+    margin:0 0 14px;
+    line-height:1.3;
+  }
+  h2{
+    font-size:20px;
+    margin:0 0 18px;
+    line-height:1.4;
+  }
+  p.lead{
+    font-size:15px;
+    line-height:1.6;
+    color:var(--muted);
+    margin:0 0 14px;
+  }
+  .qnum{
+    font-size:13px;
+    font-weight:700;
+    color:var(--blue);
+    margin:0 0 8px;
+    letter-spacing:.02em;
+  }
+  .qsub{
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 18px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .opt{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:15px;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--blue);}
+  .opt.selected{
+    border-color:var(--blue);
+    background:var(--blue-light);
+  }
+  .opt input{accent-color:var(--blue); width:17px; height:17px; flex:none;}
+  .opt-text{flex:1;}
+  .other-input{
+    margin-top:8px;
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    display:none;
+  }
+  .other-input.show{display:block;}
+  .rank-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 16px;
+    margin-bottom:10px;
+  }
+  .rank-row input{
+    width:56px;
+    padding:8px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    text-align:center;
+    font-size:15px;
+  }
+  .rank-text{flex:1; font-size:14.5px;}
+  textarea{
+    width:100%;
+    min-height:110px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+    resize:vertical;
+  }
+  .nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:28px;
+  }
+  button{
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    padding:12px 26px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--blue);
+    color:#fff;
+  }
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-primary:disabled{background:#a9bde0;cursor:not-allowed;}
+  .btn-secondary{
+    background:transparent;
+    color:var(--muted);
+  }
+  .btn-secondary:hover{color:var(--ink);}
+  .err{
+    color:var(--error);
+    font-size:13.5px;
+    margin-top:10px;
+    display:none;
+  }
+  .err.show{display:block;}
+  .hint{font-size:12.5px; color:var(--muted); margin-top:-6px; margin-bottom:14px;}
+  .footer-note{
+    text-align:center;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:18px;
+  }
+  .spinner{
+    display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;
+    border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:8px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (max-width:520px){
+    .card{padding:28px 20px;}
+    h1{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-fill" id="progressFill"></div></div>
+
+<div class="wrap">
+  <div class="card" id="card">
+    <!-- content injected by JS -->
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxOITeFHyEtciVnta1PWf_H5xiHZ5USLpfCJ77uK8VL6M9Yg0T02zzn8BvEsS-Mt1p/exec";
+
+/* ============================================================
+   QUESTIONNAIRE DATA
+   type: "single" | "multi" | "multiMax2" | "rank" | "text"
+   ============================================================ */
+var QUESTIONS = [
+  { id:"S1", section:"About Your Business and Markets", code:"S1",
+    text:"How many restaurants do you currently own or operate?",
+    type:"single",
+    options:["1–5","6–20","21–50","51–100","More than 100"]
+  },
+  { id:"S2", section:"About Your Business and Markets", code:"S2",
+    text:"In which region are most of your restaurants located?",
+    sub:"Select the one region with the largest share of your units.",
+    type:"single",
+    options:[
+      "Northeast (NY, NJ, PA, New England)",
+      "Mid-Atlantic / Southeast (DC, VA, Carolinas, GA, FL)",
+      "Midwest (OH, MI, IN, IL, WI, MN, MO, etc.)",
+      "South Central (TX, OK, LA, AR, TN, KY, AL, MS)",
+      "Mountain / Plains (CO, UT, AZ, NM, KS, NE, Dakotas)",
+      "West Coast / Pacific Northwest (CA, OR, WA, NV)",
+      "Canada or other international"
+    ]
+  },
+  { id:"S3", section:"About Your Business and Markets", code:"S3",
+    text:"How long have you been a franchisee?",
+    type:"single",
+    options:["Less than 5 years","5–10 years","11–20 years","More than 20 years"]
+  },
+  { id:"S4", section:"About Your Business and Markets", code:"S4",
+    text:"Which best describes the trade areas where most of your restaurants are located?",
+    type:"single",
+    options:["Primarily urban","Primarily suburban","Primarily rural / small town","Roughly even mix"]
+  },
+  { id:"S5", section:"About Your Business and Markets", code:"S5",
+    text:"Which best describes the household income profile of the customers your restaurants primarily serve?",
+    type:"single",
+    options:[
+      "Predominantly lower-income (median household income below ~$50K)",
+      "Predominantly middle-income (~$50K–$100K)",
+      "Predominantly upper-middle / higher-income (above ~$100K)",
+      "Broad mix with no dominant income group"
+    ]
+  },
+  { id:"S6", section:"About Your Business and Markets", code:"S6",
+    text:"Which of the following characteristics describe a meaningful share of the markets you serve?",
+    sub:"Select all that apply.",
+    type:"multi",
+    options:[
+      "Heavily Hispanic / ethnically diverse customer base",
+      "Aging or shrinking population",
+      "Fast-growing population / new housing development",
+      "High dependence on highway, travel, or tourism traffic",
+      "College towns or military bases",
+      "High-density competitor markets (multiple QSR burger brands within one mile)",
+      "States or cities with elevated minimum-wage mandates",
+      "Other"
+    ],
+    otherOption:"Other"
+  },
+  { id:"Q1", section:"Diagnosing the Underperformance", code:"Q1",
+    text:"When was your business performing at its best, considering both traffic and profitability?",
+    type:"single",
+    options:["Before 2015","2015–2018","2019 (pre-pandemic)","2020–2021 (pandemic drive-thru surge)","2022–2023","It is performing at its best now"]
+  },
+  { id:"Q2", section:"Diagnosing the Underperformance", code:"Q2",
+    text:"What was the primary driver of that peak performance?",
+    sub:"Select one.",
+    type:"single",
+    options:[
+      "Strong value platform (e.g., 4 for $4) driving traffic",
+      "Breakthrough marketing / brand momentum",
+      "Menu news that resonated (e.g., Baconator, Pretzel Bacon Pub, spicy nuggets)",
+      "Favorable consumer environment and limited competitor discounting",
+      "Lower input costs (labor, commodities) supporting margins",
+      "Operational consistency and strong franchisee-corporate alignment",
+      "Other"
+    ],
+    otherOption:"Other"
+  },
+  { id:"Q3", section:"Diagnosing the Underperformance", code:"Q3",
+    text:"Please rank the following factors that have contributed most to same-store sales underperformance versus QSR peers over the past 2–3 years.",
+    sub:"1 = largest contributor, 6 = smallest.",
+    type:"rank",
+    options:[
+      "Lack of compelling value / price-point messaging versus McDonald's, Taco Bell, Burger King",
+      "Weak or inconsistent marketing and brand positioning",
+      "Menu innovation that failed to drive traffic (LTOs, breakfast, late night)",
+      "Operations and service-speed problems at the restaurant level",
+      "Corporate leadership turnover and strategic indecision",
+      "Other"
+    ],
+    otherOption:"Other"
+  },
+  { id:"Q4", section:"Diagnosing the Underperformance", code:"Q4",
+    text:"Roughly what share of the underperformance do you attribute to company-specific decisions versus industry-wide pressures (low-income consumer weakness, inflation, competitor value wars)?",
+    type:"single",
+    options:["75% or more company-specific","About 50–75% company-specific","About 25–50% company-specific","Less than 25% company-specific; mostly industry"]
+  },
+  { id:"Q5", section:"Diagnosing the Underperformance", code:"Q5",
+    text:"Which company-specific decision has hurt your business most?",
+    sub:"Select up to two.",
+    type:"multiMax2",
+    options:[
+      "Breakfast rollout: cost and labor burden without adequate traffic payoff",
+      "Insufficient national advertising spend or poor ad effectiveness",
+      "Underinvestment in value menu relative to competitors",
+      "Required remodels / technology capex (digital menu boards, next-gen formats) with weak ROI",
+      "Unit growth targets that over-penetrated existing trade areas",
+      "Franchisee relations: limited input into strategy, pricing, or promotional calendar",
+      "Other"
+    ],
+    otherOption:"Other"
+  },
+  { id:"Q6", section:"Unit Economics and Cost Pressures", code:"Q6",
+    text:"How have your restaurant-level operating margins changed over the past three years?",
+    type:"single",
+    options:["Improved","Roughly flat","Declined modestly (less than 200 bps)","Declined meaningfully (200–500 bps)","Declined severely (more than 500 bps)"]
+  },
+  { id:"Q7", section:"Unit Economics and Cost Pressures", code:"Q7",
+    text:"Please rank the following cost pressures by their impact on your profitability.",
+    sub:"1 = greatest pressure, 7 = least.",
+    type:"rank",
+    options:[
+      "Labor: wage rates, scheduling, and turnover",
+      "Food and paper costs (beef, produce, packaging)",
+      "Occupancy: rent, utilities, property taxes",
+      "Insurance and general liability",
+      "Royalties, advertising fund, and technology fees paid to the franchisor",
+      "Third-party delivery commissions",
+      "Required remodel and equipment capex"
+    ]
+  },
+  { id:"Q8", section:"Unit Economics and Cost Pressures", code:"Q8",
+    text:"How significantly are these economic pressures affecting your business today?",
+    type:"single",
+    options:[
+      "Minimal: margins remain healthy and I am continuing to reinvest and grow",
+      "Moderate: margins are squeezed but all restaurants remain cash-flow positive",
+      "Significant: some restaurants are cash-flow negative or near breakeven",
+      "Severe: I have closed or am considering closing restaurants, or am unable to fund required capex"
+    ]
+  },
+  { id:"Q9", section:"Unit Economics and Cost Pressures", code:"Q9",
+    text:"What would do the most to restore your unit-level profitability?",
+    sub:"Select one.",
+    type:"single",
+    options:[
+      "Traffic recovery through stronger value and marketing",
+      "Relief on royalties, advertising fund, or technology fees",
+      "Menu pricing flexibility and simplification",
+      "Flexibility on remodel and equipment requirements",
+      "Labor-saving technology (kiosks, AI drive-thru, kitchen automation)",
+      "Other"
+    ],
+    otherOption:"Other"
+  },
+  { id:"Q10", section:"The Path Forward", code:"Q10",
+    text:"What is the single most important thing corporate should do in the next 12 months to turn around traffic?",
+    type:"single",
+    options:[
+      "Launch a sustained, nationally advertised everyday-value platform",
+      "Reallocate spend from breakfast / late night to core lunch and dinner",
+      "Materially increase advertising fund contribution and reach",
+      "Simplify the menu and improve speed of service",
+      "Reduce franchisee capex requirements and royalty / technology fee burden",
+      "Other"
+    ],
+    otherOption:"Other"
+  },
+  { id:"Q11", section:"Structural Concerns", code:"Q11",
+    text:"Of the structural concerns below, which worries you most for your restaurants over the next 3–5 years?",
+    type:"single",
+    options:[
+      "“K-shaped” economy: continued erosion of the low- and middle-income customer",
+      "GLP-1 adoption reducing QSR visit frequency and check size",
+      "Permanent share loss to fast-casual (Chipotle, Cava) and better-burger concepts",
+      "Labor cost inflation and minimum-wage changes",
+      "Third-party delivery margin compression",
+      "None of these concerns me materially"
+    ]
+  },
+  { id:"Q12", section:"Structural Concerns", code:"Q12",
+    text:"How much of your traffic decline do you believe is structural and unlikely to come back, regardless of what corporate does?",
+    type:"single",
+    options:["None; it is cyclical and brand-execution driven","A small portion (under 25%)","A meaningful portion (25–50%)","Most of it (over 50%)"]
+  },
+  { id:"Q13", section:"New Leadership", code:"Q13",
+    text:"Have you observed any tangible changes from the new leadership team at the restaurant or field level?",
+    type:"single",
+    options:[
+      "Yes, meaningful positive changes already visible in traffic or operations",
+      "Yes, early positive changes in communication / strategy, but not yet in results",
+      "No meaningful change yet; too early to tell",
+      "Changes observed, but I view them negatively",
+      "Unaware of any changes"
+    ]
+  },
+  { id:"Q14", section:"New Leadership", code:"Q14",
+    text:"Which area has new management improved the most so far?",
+    sub:"Select one.",
+    type:"single",
+    options:[
+      "Franchisee communication and responsiveness",
+      "Marketing and promotional calendar",
+      "Value and pricing strategy",
+      "Capex / remodel flexibility and cost relief",
+      "Operations support and training",
+      "No improvement in any area"
+    ]
+  },
+  { id:"Q15", section:"Outlook", code:"Q15",
+    text:"What do you expect U.S. same-store sales growth to be over the next 12 months?",
+    type:"single",
+    options:["Below negative mid-single-digit (below -6%)","Negative low-single-digit (-1% to -3%)","Flat to +1%","Low-single-digit (+1% to +3%)","Mid-single-digit (+3% to +6%)"]
+  },
+  { id:"Q16", section:"Outlook", code:"Q16",
+    text:"How confident are you that same-store sales can sustain low- to mid-single-digit growth by 2028?",
+    type:"single",
+    options:["Very confident (greater than 75% likelihood)","Somewhat confident (50–75%)","Not very confident (25–50%)","Not confident (below 25%)"]
+  },
+  { id:"Q17", section:"Outlook", code:"Q17",
+    text:"Any additional comments on what is driving performance or what would most change your outlook?",
+    sub:"Optional.",
+    type:"text",
+    optional:true
+  }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var params = new URLSearchParams(window.location.search);
+var REF = params.get("ref") || "no-ref";
+var STORAGE_KEY = "survey_lock_" + REF;
+var current = -1; // -1 = intro
+var answers = {};
+
+var card = document.getElementById("card");
+var progressFill = document.getElementById("progressFill");
+
+/* ============================================================
+   ONE-TIME-USE LOCK (client-side instant check; server checked on submit)
+   ============================================================ */
+function isLocked(){
+  return localStorage.getItem(STORAGE_KEY) === "used";
+}
+function setLocked(){
+  localStorage.setItem(STORAGE_KEY, "used");
+}
+
+function checkServerLock(cb){
+  if (!SCRIPT_URL || SCRIPT_URL.indexOf("PASTE_YOUR") === 0){ cb(false); return; }
+  var img = new Image();
+  var cbName = "cb_" + Date.now();
+  window[cbName] = function(resp){ cb(resp && resp.used === true); delete window[cbName]; };
+  var s = document.createElement("script");
+  s.src = SCRIPT_URL + "?action=checkLock&ref=" + encodeURIComponent(REF) + "&callback=" + cbName;
+  s.onerror = function(){ cb(false); };
+  document.body.appendChild(s);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderIntro(){
+  progressFill.style.width = "0%";
+  card.innerHTML =
+    '<p class="eyebrow">Survey introduction</p>' +
+    '<h1>Franchisee Research Survey</h1>' +
+    '<p class="lead">This research is being conducted on behalf of a client. Thank you for taking part in this study. We’re speaking with franchisees across the US and internationally to understand what’s really driving performance at the unit level, from traffic and margins to how recent changes in leadership and strategy are playing out on the ground.</p>' +
+    '<p class="lead">Your responses will be aggregated and reported anonymously. No individual answers or restaurant-level data will be shared with the franchisor or any third party. The survey takes about 12–15 minutes.</p>' +
+    '<p class="lead">If anything in this survey is unclear, please let us know and we will be happy to assist.</p>' +
+    '<div class="nav" style="justify-content:flex-end;">' +
+      '<button class="btn-primary" id="startBtn">Begin survey</button>' +
+    '</div>';
+  document.getElementById("startBtn").onclick = function(){
+    logEvent("start");
+    current = 0;
+    renderQuestion();
+  };
+}
+
+function renderLockedScreen(){
+  card.innerHTML =
+    '<h1>This link has already been used</h1>' +
+    '<p class="lead">Our records show this survey link has already been submitted. If you believe this is an error, please get in touch with the research team.</p>';
+}
+
+function renderThankYou(){
+  progressFill.style.width = "100%";
+  card.innerHTML =
+    '<h1>Thank you</h1>' +
+    '<p class="lead">Your responses have been recorded. We appreciate you taking the time to share your perspective.</p>';
+}
+
+function optionKey(qid, opt){
+  return qid + "::" + opt;
+}
+
+function renderQuestion(){
+  var q = QUESTIONS[current];
+  progressFill.style.width = Math.round(((current) / QUESTIONS.length) * 100) + "%";
+
+  var html = '<p class="qnum">' + q.section + '</p>';
+  html += '<h2>' + escapeHtml(q.text) + '</h2>';
+  if (q.sub) html += '<p class="qsub">' + escapeHtml(q.sub) + '</p>';
+
+  if (q.type === "single"){
+    html += '<div class="options">';
+    q.options.forEach(function(opt, i){
+      var selected = answers[q.id] && answers[q.id].value === opt;
+      html += '<label class="opt' + (selected ? ' selected' : '') + '" data-opt="' + i + '">' +
+        '<input type="radio" name="' + q.id + '" ' + (selected ? 'checked' : '') + '>' +
+        '<span class="opt-text">' + escapeHtml(opt) + '</span></label>';
+    });
+    html += '</div>';
+    if (q.otherOption){
+      var showOther = answers[q.id] && answers[q.id].value === q.otherOption;
+      html += '<input type="text" class="other-input' + (showOther ? ' show' : '') + '" id="otherText" placeholder="Please specify" value="' + escapeHtml((answers[q.id] && answers[q.id].other) || "") + '">';
+    }
+  }
+
+  if (q.type === "multi" || q.type === "multiMax2"){
+    var picked = (answers[q.id] && answers[q.id].values) || [];
+    html += '<div class="options">';
+    q.options.forEach(function(opt, i){
+      var checked = picked.indexOf(opt) > -1;
+      html += '<label class="opt' + (checked ? ' selected' : '') + '" data-opt="' + i + '">' +
+        '<input type="checkbox" value="' + i + '" ' + (checked ? 'checked' : '') + '>' +
+        '<span class="opt-text">' + escapeHtml(opt) + '</span></label>';
+    });
+    html += '</div>';
+    if (q.type === "multiMax2") html += '<p class="hint">Choose up to two.</p>';
+    if (q.otherOption){
+      var showOther2 = picked.indexOf(q.otherOption) > -1;
+      html += '<input type="text" class="other-input' + (showOther2 ? ' show' : '') + '" id="otherText" placeholder="Please specify" value="' + escapeHtml((answers[q.id] && answers[q.id].other) || "") + '">';
+    }
+  }
+
+  if (q.type === "rank"){
+    var ranks = (answers[q.id] && answers[q.id].ranks) || {};
+    q.options.forEach(function(opt, i){
+      html += '<div class="rank-row"><input type="number" min="1" max="' + q.options.length + '" data-rankopt="' + i + '" value="' + (ranks[i] || "") + '">' +
+        '<span class="rank-text">' + escapeHtml(opt) + '</span></div>';
+    });
+    if (q.otherOption){
+      html += '<input type="text" class="other-input show" id="otherText" placeholder="If “Other” ranked, please specify" value="' + escapeHtml((answers[q.id] && answers[q.id].other) || "") + '">';
+    }
+  }
+
+  if (q.type === "text"){
+    html += '<textarea id="textAnswer" placeholder="Type your comments here...">' + escapeHtml((answers[q.id] && answers[q.id].value) || "") + '</textarea>';
+  }
+
+  html += '<p class="err" id="errMsg"></p>';
+  html += '<div class="nav">' +
+    '<button class="btn-secondary" id="backBtn">Back</button>' +
+    '<button class="btn-primary" id="nextBtn">' + (current === QUESTIONS.length - 1 ? 'Submit' : 'Next') + '</button>' +
+    '</div>';
+
+  card.innerHTML = html;
+  wireQuestionEvents(q);
+
+  document.getElementById("backBtn").onclick = function(){
+    if (current === 0){ current = -1; renderIntro(); }
+    else { current--; renderQuestion(); }
+  };
+  document.getElementById("nextBtn").onclick = function(){ handleNext(q); };
+}
+
+function wireQuestionEvents(q){
+  if (q.type === "single"){
+    card.querySelectorAll(".opt").forEach(function(el){
+      var input = el.querySelector("input");
+      input.addEventListener("change", function(){
+        var i = parseInt(el.getAttribute("data-opt"), 10);
+        var val = q.options[i];
+        answers[q.id] = answers[q.id] || {};
+        answers[q.id].value = val;
+        card.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("selected"); });
+        el.classList.add("selected");
+        var otherBox = document.getElementById("otherText");
+        if (otherBox){
+          if (val === q.otherOption) otherBox.classList.add("show");
+          else otherBox.classList.remove("show");
+        }
+      });
+    });
+  }
+  if (q.type === "multi" || q.type === "multiMax2"){
+    card.querySelectorAll(".opt").forEach(function(el){
+      var input = el.querySelector("input");
+      input.addEventListener("change", function(){
+        var i = parseInt(el.getAttribute("data-opt"), 10);
+        var opt = q.options[i];
+        answers[q.id] = answers[q.id] || { values: [] };
+        var vals = answers[q.id].values;
+        var idx = vals.indexOf(opt);
+        var isChecked = input.checked;
+        if (isChecked && q.type === "multiMax2" && vals.length >= 2){
+          input.checked = false;
+          showErr("You can select up to two options.");
+          return;
+        }
+        if (isChecked && idx === -1) vals.push(opt);
+        if (!isChecked && idx > -1) vals.splice(idx, 1);
+        el.classList.toggle("selected", isChecked);
+        var otherBox = document.getElementById("otherText");
+        if (otherBox){
+          if (vals.indexOf(q.otherOption) > -1) otherBox.classList.add("show");
+          else otherBox.classList.remove("show");
+        }
+      });
+    });
+  }
+  if (q.type === "rank"){
+    card.querySelectorAll('[data-rankopt]').forEach(function(el){
+      el.oninput = function(){
+        var i = parseInt(el.getAttribute("data-rankopt"), 10);
+        answers[q.id] = answers[q.id] || { ranks: {} };
+        answers[q.id].ranks[i] = el.value;
+      };
+    });
+  }
+}
+
+function showErr(msg){
+  var e = document.getElementById("errMsg");
+  if (e){ e.textContent = msg; e.classList.add("show"); }
+}
+function clearErr(){
+  var e = document.getElementById("errMsg");
+  if (e){ e.textContent = ""; e.classList.remove("show"); }
+}
+
+function handleNext(q){
+  clearErr();
+  var otherBox = document.getElementById("otherText");
+
+  if (q.type === "single"){
+    if (!answers[q.id] || !answers[q.id].value){ showErr("Please select an answer to continue."); return; }
+    if (answers[q.id].value === q.otherOption && otherBox){
+      if (!otherBox.value.trim()){ showErr("Please specify your answer."); return; }
+      answers[q.id].other = otherBox.value.trim();
+    }
+  }
+  if (q.type === "multi" || q.type === "multiMax2"){
+    var vals = (answers[q.id] && answers[q.id].values) || [];
+    if (vals.length === 0){ showErr("Please select at least one option to continue."); return; }
+    if (vals.indexOf(q.otherOption) > -1 && otherBox){
+      if (!otherBox.value.trim()){ showErr("Please specify your answer."); return; }
+      answers[q.id].other = otherBox.value.trim();
+    }
+  }
+  if (q.type === "rank"){
+    var ranks = (answers[q.id] && answers[q.id].ranks) || {};
+    var n = q.options.length;
+    var seen = {};
+    for (var i = 0; i < n; i++){
+      var v = parseInt(ranks[i], 10);
+      if (!v || v < 1 || v > n){ showErr("Please rank every item from 1 to " + n + "."); return; }
+      if (seen[v]){ showErr("Each rank number can only be used once."); return; }
+      seen[v] = true;
+    }
+    if (q.otherOption && otherBox && otherBox.classList.contains("show") === false){
+      // other box always shown for rank questions that have it; no-op
+    }
+  }
+  if (q.type === "text"){
+    var ta = document.getElementById("textAnswer");
+    answers[q.id] = { value: ta ? ta.value.trim() : "" };
+    if (!q.optional && !answers[q.id].value){ showErr("Please provide an answer to continue."); return; }
+  }
+
+  logEvent("progress", q.id);
+
+  if (current === QUESTIONS.length - 1){
+    submitSurvey();
+  } else {
+    current++;
+    renderQuestion();
+  }
+}
+
+/* ============================================================
+   ESCAPE HTML (so option text starting with "<" never breaks rendering)
+   ============================================================ */
+function escapeHtml(str){
+  if (str === undefined || str === null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/* ============================================================
+   SUBMIT
+   ============================================================ */
+function buildPayload(){
+  var row = { ref: REF, ts_client: new Date().toISOString() };
+  QUESTIONS.forEach(function(q){
+    var a = answers[q.id];
+    if (!a){ row[q.code] = ""; return; }
+    if (q.type === "single"){
+      row[q.code] = a.value || "";
+      if (a.other) row[q.code + "_other"] = a.other;
+    } else if (q.type === "multi" || q.type === "multiMax2"){
+      q.options.forEach(function(opt){
+        row[q.code + " | " + opt] = (a.values || []).indexOf(opt) > -1 ? 1 : 0;
+      });
+      if (a.other) row[q.code + "_other"] = a.other;
+    } else if (q.type === "rank"){
+      q.options.forEach(function(opt, i){
+        row[q.code + " | " + opt] = (a.ranks && a.ranks[i]) ? a.ranks[i] : "";
+      });
+      if (a.other) row[q.code + "_other"] = a.other;
+    } else if (q.type === "text"){
+      row[q.code] = a.value || "";
+    }
+  });
+  return row;
+}
+
+function submitSurvey(){
+  var nextBtn = document.getElementById("nextBtn");
+  if (nextBtn){ nextBtn.disabled = true; nextBtn.innerHTML = '<span class="spinner"></span>Submitting...'; }
+
+  var payload = buildPayload();
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "submit", data: payload })
+  }).then(function(){
+    setLocked();
+    renderThankYou();
+  }).catch(function(){
+    setLocked();
+    renderThankYou();
+  });
+}
+
+function logEvent(type, qid){
+  if (!SCRIPT_URL || SCRIPT_URL.indexOf("PASTE_YOUR") === 0) return;
+  try{
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "event", ref: REF, type: type, qid: qid || "" })
+    });
+  }catch(e){}
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init(){
+  if (isLocked()){ renderLockedScreen(); return; }
+  checkServerLock(function(used){
+    if (used){ setLocked(); renderLockedScreen(); return; }
+    renderIntro();
+  });
+}
+init();
+</script>
+</body>
+</html>
